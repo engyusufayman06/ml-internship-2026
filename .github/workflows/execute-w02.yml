@@ -1,6 +1,11 @@
 name: Execute W02 Notebook
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'work/notebooks/w02_ml_task_framing.ipynb'
+      - '.github/workflows/execute-w02.yml'
   workflow_dispatch:
 
 permissions:
@@ -8,6 +13,7 @@ permissions:
 
 jobs:
   execute-notebook:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,6 +44,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No notebook changes to commit."
           else
-            git commit -m "chore: execute W02 ML task framing notebook"
+            git commit -m "chore: execute W02 ML task framing notebook [skip ci]"
             git push
           fi
