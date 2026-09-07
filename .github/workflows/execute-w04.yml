@@ -1,0 +1,49 @@
+name: Execute W04 Baseline Notebook
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'work/notebooks/w04_baseline_score.ipynb'
+      - '.github/workflows/execute-w04.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  execute-notebook:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install notebook dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install jupyter nbconvert pandas nbformat
+
+      - name: Execute W04 notebook
+        run: |
+          jupyter nbconvert --to notebook --execute \
+            --inplace \
+            --ExecutePreprocessor.timeout=600 \
+            work/notebooks/w04_baseline_score.ipynb
+
+      - name: Commit executed notebook and receipts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add work/notebooks/w04_baseline_score.ipynb work/outputs/*.json
+          if git diff --cached --quiet; then
+            echo "No notebook changes to commit."
+          else
+            git commit -m "chore: execute W04 baseline notebook [skip ci]"
+            git push
+          fi
