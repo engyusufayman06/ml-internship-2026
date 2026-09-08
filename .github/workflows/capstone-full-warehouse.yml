@@ -9,8 +9,6 @@ on:
       - 'work/notebooks/capstone.ipynb'
       - '.github/workflows/capstone-full-warehouse.yml'
 
-auto_cancel: false
-
 permissions:
   contents: write
 
