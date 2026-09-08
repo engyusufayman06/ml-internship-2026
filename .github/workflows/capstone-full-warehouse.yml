@@ -26,8 +26,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install capstone dependencies
+        run: pip install duckdb pandas numpy scikit-learn
 
       - name: Validate secret presence
         run: test -n "$HF_TOKEN"
