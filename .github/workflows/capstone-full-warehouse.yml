@@ -1,0 +1,46 @@
+name: Run Full Warehouse Capstone
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/run_capstone.py'
+      - 'work/notebooks/capstone.ipynb'
+      - '.github/workflows/capstone-full-warehouse.yml'
+
+auto_cancel: false
+
+permissions:
+  contents: write
+
+jobs:
+  capstone:
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate secret presence
+        run: test -n "$HF_TOKEN"
+
+      - name: Run full warehouse capstone
+        run: python scripts/run_capstone.py
+
+      - name: Commit public-safe results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add work/outputs/capstone_metrics.json work/outputs/capstone_ranked_queue.csv work/outputs/paper_summary.json
+          git diff --cached --quiet || git commit -m "chore: publish verified capstone results [skip ci]"
+          git push
